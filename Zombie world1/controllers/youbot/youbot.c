@@ -99,6 +99,19 @@ void stop()
 
 void robot_control()
 {
+
+	const unsigned char *image = wb_camera_get_image(3);
+	for (int x = 0; x < 128; x++)
+	{
+		for (int y = 0; y < 64; y++) 
+		{
+			int r = wb_camera_image_get_red(image, 64, x, y);
+			int g = wb_camera_image_get_green(image, 64, x, y);
+			int b = wb_camera_image_get_blue(image, 64, x, y);
+			printf("red=%d, green=%d, blue=%d", r, g, b);
+		}
+	}
+	
 	////////////// TO ROTATE THE ROBOT (BETWEEN 0 - 345) WITH 15 DEGREE INTERVALS ///////////////
 	//rotate_robot(45);
 	//rotate_robot(255);
