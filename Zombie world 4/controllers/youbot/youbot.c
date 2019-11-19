@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h> 
 
 #include <webots/camera.h>
 #include <webots/accelerometer.h>
@@ -100,17 +101,17 @@ void robot_control()
 {
 
 	////////////// TO GET RGB FROM THE CAMERA ///////////////////////////////////////////////////
-	const unsigned char *image = wb_camera_get_image(8);
-	for (int x = 0; x < 20; x++)
-	{
-		for (int y = 0; y < 20; y++) 
-		{
-			int r = wb_camera_image_get_red(image, 64, x, y);
-			int g = wb_camera_image_get_green(image, 64, x, y);
-			int b = wb_camera_image_get_blue(image, 64, x, y);
-			printf("red=%d, green=%d, blue=%d \n", r, g, b);
-		}
-	}
+	// const unsigned char *image = wb_camera_get_image(4);
+	// for (int x = 0; x < 20; x++)
+	// {
+		// for (int y = 0; y < 20; y++) 
+		// {
+			// int r = wb_camera_image_get_red(image, 64, x, y);
+			// int g = wb_camera_image_get_green(image, 64, x, y);
+			// int b = wb_camera_image_get_blue(image, 64, x, y);
+			// printf("red=%d, green=%d, blue=%d \n", r, g, b);
+		// }
+	// }
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	
 }
@@ -148,29 +149,29 @@ int main(int argc, char **argv)
   ///////////////////////// CHANGE CODE BELOW HERE ONLY ////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-  //wb_accelerometer_enable(1,1);
-  // wb_gps_enable(2,TIME_STEP);
-  // wb_compass_enable(3,TIME_STEP);
-  // wb_camera_enable(4,TIME_STEP);
-  // wb_camera_enable(5,TIME_STEP);
-  // wb_camera_enable(6,TIME_STEP);
-  // wb_camera_enable(7,TIME_STEP);
+  wb_accelerometer_enable(1,1);
+  wb_gps_enable(2,TIME_STEP);
+  wb_compass_enable(3,TIME_STEP);
+  wb_camera_enable(4,TIME_STEP);
+  wb_camera_enable(5,TIME_STEP);
+  wb_camera_enable(6,TIME_STEP);
+  wb_camera_enable(7,TIME_STEP);
   wb_camera_enable(8,TIME_STEP);
-  //wb_camera_enable(9,TIME_STEP);
-  // wb_camera_enable(10,TIME_STEP);
-  // wb_camera_enable(11,TIME_STEP);
-  //wb_gyro_enable(12,TIME_STEP);
-  //wb_light_sensor_enable(13,TIME_STEP);
-  //wb_receiver_enable(14,TIME_STEP);
-  //wb_range_finder_enable(15,TIME_STEP);
-  //wb_lidar_enable(16,1); 
+  wb_camera_enable(9,TIME_STEP);
+  wb_camera_enable(10,TIME_STEP);
+  wb_camera_enable(11,TIME_STEP);
+  wb_gyro_enable(12,TIME_STEP);
+  wb_light_sensor_enable(13,TIME_STEP);
+  wb_receiver_enable(14,TIME_STEP);
+  wb_range_finder_enable(15,TIME_STEP);
+  wb_lidar_enable(16,1); 
   
   //WbDeviceTag lidar = wb_robot_get_device("lidar");
   //wb_lidar_enable_point_cloud(lidar);
 
   //WbDeviceTag rec = wb_robot_get_device("receiver");
  
-  int i = 0;
+  //int i = 0;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////// CHANGE CODE ABOVE HERE ONLY ////////////////////////////////////////////////////
@@ -193,7 +194,6 @@ int main(int argc, char **argv)
 	}
     if (timer == 16)
     {
-
         update_robot(&robot_info);
         timer = 0;
     }
@@ -213,22 +213,22 @@ int main(int argc, char **argv)
     
     // this is called everytime step.
 
-    if (i < 100)
-    {
-    	base_forwards();
-    }
-    if (i == 100)
-    {
-    	base_reset();
-    	base_turn_left();
-    }
-    if (i == 300)
-    {
-    	i = 0;
-    }
-    i++;
+    // if (i < 100)
+    // {
+    // 	base_forwards();
+    // }
+    // if (i == 100)
+    // {
+    // 	base_reset();
+    // 	base_turn_left();
+    // }
+    // if (i == 300)
+    // {
+    // 	i = 0;
+    // }
+    // i++;
 
-    robot_control();
+    // robot_control();
 
 
    //  if (wb_receiver_get_queue_length(rec) > 0) 
