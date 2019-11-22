@@ -97,24 +97,55 @@ void turn_right()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void robot_control()
-{
+/*Robot control reading in the pixels from the camera and tells us which color berry is in front of us*/
+int robot_control()
+{ 
 
 	////////////// TO GET RGB FROM THE CAMERA ///////////////////////////////////////////////////
-	// const unsigned char *image = wb_camera_get_image(4);
-	// for (int x = 0; x < 20; x++)
-	// {
-		// for (int y = 0; y < 20; y++) 
-		// {
-			// int r = wb_camera_image_get_red(image, 64, x, y);
-			// int g = wb_camera_image_get_green(image, 64, x, y);
-			// int b = wb_camera_image_get_blue(image, 64, x, y);
-			// printf("red=%d, green=%d, blue=%d \n", r, g, b);
-		// }
-	// }
-	/////////////////////////////////////////////////////////////////////////////////////////////
+	const unsigned char *image = wb_camera_get_image(8);
+	int width = wb_camera_get_width(8);
+	int height = wb_camera_get_height(8);
 	
+	for (int x = width/3; x < 2*width/3; x++)
+	{
+		for (int y = 1*height/10; y < 5*height/10; y++) 
+		{
+			int r = wb_camera_image_get_red(image, width, x, y);
+			int g = wb_camera_image_get_green(image, width, x, y);
+			int b = wb_camera_image_get_blue(image, width, x, y);
+			
+			/* This returns a number that'll be used to index an array.
+                      Each berry is assigned a number - Orange is 0,... and null is 4*/
+        		if ((r > 170) && (g > 100) && (b < 110)&& (g < 160) && (b > 60)){
+                		printf("orange berry");
+                		return 0;
+        		}
+                		
+                	else if ((r > 190) && (g < 80) && (b < 70)){
+                		printf("red berry");
+                		return 1;
+        		}
+                	else if ((r > 170) && (g > 100) && (b > 150) && (g < 160) && (b < 200)){
+                		printf("pink berry");
+                		return 2;
+        		}
+                	else if ((r > 170) && (g > 160) && (b < 60)){
+                		printf("yellow berry");
+                		return 3;
+        		}
+                  	else{
+                      	return 4;
+                  	}
+                      	
+                	
+		}
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	return 4;
 }
+
+/*Will teach the robot between good and bad berries by updating the array each time it eats*/
+int berry_learning[] = {0,0,0,0};
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,29 +180,33 @@ int main(int argc, char **argv)
   ///////////////////////// CHANGE CODE BELOW HERE ONLY ////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-  wb_accelerometer_enable(1,1);
-  wb_gps_enable(2,TIME_STEP);
-  wb_compass_enable(3,TIME_STEP);
-  wb_camera_enable(4,TIME_STEP);
-  wb_camera_enable(5,TIME_STEP);
-  wb_camera_enable(6,TIME_STEP);
-  wb_camera_enable(7,TIME_STEP);
+  // wb_accelerometer_enable(1,1);
+  // wb_gps_enable(2,TIME_STEP);
+  // wb_compass_enable(3,TIME_STEP);
+  // wb_camera_enable(4,TIME_STEP);
+  // wb_camera_enable(5,TIME_STEP);
+  // wb_camera_enable(6,TIME_STEP);
+  // wb_camera_enable(7,TIME_STEP);
   wb_camera_enable(8,TIME_STEP);
-  wb_camera_enable(9,TIME_STEP);
-  wb_camera_enable(10,TIME_STEP);
-  wb_camera_enable(11,TIME_STEP);
-  wb_gyro_enable(12,TIME_STEP);
-  wb_light_sensor_enable(13,TIME_STEP);
-  wb_receiver_enable(14,TIME_STEP);
-  wb_range_finder_enable(15,TIME_STEP);
+  // wb_camera_enable(9,TIME_STEP);
+  // wb_camera_enable(10,TIME_STEP);
+  // wb_camera_enable(11,TIME_STEP);
+  // wb_gyro_enable(12,TIME_STEP);
+  // wb_light_sensor_enable(13,TIME_STEP);
+  // wb_receiver_enable(14,TIME_STEP);
+  // wb_range_finder_enable(15,TIME_STEP);
   wb_lidar_enable(16,1); 
   
-  //WbDeviceTag lidar = wb_robot_get_device("lidar");
-  //wb_lidar_enable_point_cloud(lidar);
+  WbDeviceTag lidar = wb_robot_get_device("lidar");
+  wb_lidar_enable_point_cloud(lidar);
 
   //WbDeviceTag rec = wb_robot_get_device("receiver");
  
-  //int i = 0;
+  int i = 0;
+  int current_berry;
+  int current_energy;
+  int berryFlag = 0;
+  bool escape = false;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////// CHANGE CODE ABOVE HERE ONLY ////////////////////////////////////////////////////
@@ -213,30 +248,91 @@ int main(int argc, char **argv)
     
     // this is called everytime step.
 
-    // if (i < 100)
-    // {
-    // 	base_forwards();
-    // }
-    // if (i == 100)
-    // {
-    // 	base_reset();
-    // 	base_turn_left();
-    // }
-    // if (i == 300)
-    // {
-    // 	i = 0;
-    // }
-    // i++;
+    if (i < 300)
+    {
+       //base_turn_left();
+    	//base_forwards();
+    	go_backward();
+    	printf("O%d\n",i);
+    }
+    if (i == 300)
+    {
+    	// base_reset();
+    	//base_turn_left();
+    	go_backward();
+    }
+    if (i == 400)
+    {
+    	i = 0;
+    }
+    
+    
+    int berry = robot_control();
+    /*If a berry is detected by the camera then it enters the state that
+     updates the learning array and eats or navigates around berries if they are harmful*/
+    if ((berry != 4)&& (berryFlag == 0)) {
+      i = 0;
+      berryFlag = 1;
+    }
+    
+    if (berryFlag == 1)
+    {
+      printf("STEP%d\n", i);
+      base_reset();
+      if ((berry == 0)||(berry == 1)||(berry == 2)||(berry == 3)) {
+        current_berry = berry;
+        current_energy = robot_info.energy;  
+      }
+      
+      
+      if (berry_learning[current_berry] > -1) {
+        go_backward();
+      }
+      else { //jump to escape
+        //escape the berry
+        escape = true;
+        base_reset();
+      } 
+    
+    // after eating
+      if ((i == 2)&&(escape == false)){
+        if (robot_info.energy < (current_energy - 5)) {
+          berry_learning[current_berry] = berry_learning[current_berry] - 1;
+        }
+        else {
+           berry_learning[current_berry] = berry_learning[current_berry] - 1;
+        }
+        printf("back%d", berry_learning[current_berry]);
+        berryFlag = 0;
+        i = 0;
+      }
 
-    // robot_control();
+      if ((i <= 3)&&(escape == true)) {
+        printf("back up%d", i);
+        go_forward();
+      }
+      
+      if ((i>3)&&(i<100)){
+        base_turn_left();
+      }
+      if (i==100){
+        berryFlag = 0;
+        i = 0;
+        escape = false;
+      }
+    }
+    
+    
+    
+    i++;
 
 
-   //  if (wb_receiver_get_queue_length(rec) > 0) 
+    // if (wb_receiver_get_queue_length(rec) > 0) 
   	// {
-  	// 	const char *buffer = wb_receiver_get_data(rec);
-   //      printf("Communicating: received \"%s\"\n", buffer);
-   //  	wb_receiver_next_packet(rec);
-   //  }
+  		// const char *buffer = wb_receiver_get_data(rec);
+        // printf("Communicating: received \"%s\"\n", buffer);
+    	// wb_receiver_next_packet(rec);
+    // }
 
     
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
